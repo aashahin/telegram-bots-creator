@@ -54,46 +54,59 @@ let path = 'none';
 const create = async (ctx) => {
     await ctx.reply('الرجاء إدخال كلمة المرور');
     path = 'create';
-    bot.drop((ctx) => {
+    let step = 0;
+
+    bot.drop(async (ctx) => {
         if (path !== 'create') {
             return;
         }
         const password = ctx.message['text'];
-        return db.get('SELECT * FROM settings WHERE password = ?', [password], async (err, row) => {
-            if (err) {
-                console.error(err);
-                return;
-            }
 
-            if (row) {
-                await bot.telegram.sendMessage(ctx.chat.id, 'الخطوة الأولى: قم بالحصول على رمز الوصول من خلال إنشاء بوت جديد من هذا الرابط: https://t.me/botfather\n\nالخطوة الثانية: بعد إنشاء البوت ستجد قائمة خيارات من ضمنها API Token قم بنسخ الرمز وإرساله هنا.\n\nمثال: 123456789:ABCdefGhIjKlMnOpQrStUvWxYz123456789\n\n');
+        switch (step) {
+            case 0:
+                db.get('SELECT * FROM settings WHERE password = ?', [password], async (err, row) => {
+                    if (err) {
+                        console.error(err);
+                        return;
+                    }
 
-                bot.drop(async (ctx) => {
-                    const token = ctx.message['text'];
+                    if (row) {
+                        await ctx.reply('الخطوة الأولى: قم بالحصول على رمز الوصول من خلال إنشاء بوت جديد من هذا الرابط: https://t.me/botfather\n\nالخطوة الثانية: بعد إنشاء البوت ستجد قائمة خيارات من ضمنها API Token قم بنسخ الرمز وإرساله هنا.\n\nمثال: 123456789:ABCdefGhIjKlMnOpQrStUvWxYz123456789\n\n');
+                        step = 1;
+                    } else {
+                        await ctx.reply('كلمة المرور غير صحيحة');
+                    }
+                });
+                break;
+            case 1:
+                let botInfo;
+                const token = ctx.message['text'];
+                try {
                     const newBot = new Telegraf(token);
-                    const botInfo = await newBot.telegram.getMe();
-                    const botName = botInfo.username;
-                    const botId = botInfo.id;
+                    botInfo = await newBot.telegram.getMe();
+                } catch (e) {
+                    return ctx.reply('الرمز الذي أدخلته غير صحيح');
+                }
+                const botName = botInfo.username;
+                const botId = botInfo.id;
 
-                    db.run(`INSERT INTO admins (username, bot_id) VALUES ('${ctx.message.from.username}', ${botId})`, function (err) {
-                        if (err) {
-                            return console.log(err.message);
-                        }
-                    });
+                db.run(`INSERT INTO admins (username, bot_id) VALUES ('${ctx.message.from.username}', ${botId})`, function (err) {
+                    if (err) {
+                        return console.log(err.message);
+                    }
+                });
 
-                    db.run('INSERT INTO bots (token, bot_id) VALUES (?,?)', [token, botId], function (err) {
-                        if (err) {
-                            return console.log(err.message);
-                        }
-                        return bot.telegram.sendMessage(ctx.chat.id, `تم تهيئة البوت بنجاح! يمكنك الوصول إليه عبر الرابط التالي: https://t.me/${botName}`);
-                    });
-                })
-            } else {
-                return ctx.reply('كلمة المرور غير صحيحة');
-            }
-        });
+                db.run('INSERT INTO bots (token, bot_id) VALUES (?,?)', [token, botId], function (err) {
+                    if (err) {
+                        return console.log(err.message);
+                    }
+                    bot.telegram.sendMessage(ctx.chat.id, `تم تهيئة البوت بنجاح! يمكنك الوصول إليه عبر الرابط التالي: https://t.me/${botName}`);
+                });
+                break;
+        }
     });
 }
+
 
 const viewBots = async (ctx) => {
     ctx.reply('الرجاء إدخال كلمة المرور');

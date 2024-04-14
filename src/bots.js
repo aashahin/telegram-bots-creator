@@ -25,7 +25,7 @@ db.all('SELECT * FROM bots', [], (err, rows) => {
             const bot = new Telegraf(row.token, {
                 telegram: {
                     agent: new Agent({
-                        keepAlive: true
+                        keepAlive: true,
                     }),
                     apiRoot: 'http://0.0.0.0:8081'
                 }
@@ -56,8 +56,7 @@ db.all('SELECT * FROM bots', [], (err, rows) => {
 
             async function isAdmin(ctx) {
                 const admins = await getAdmins();
-                // return admins.find(admin => admin.username === ctx.message.from.username);
-                return true;
+                return admins.find(admin => admin.username === ctx.message.from.username);
             }
 
             bot.start(async (ctx) => {
@@ -255,16 +254,17 @@ db.all('SELECT * FROM bots', [], (err, rows) => {
                                 path = 'none';
                                 break;
                             case 'post':
-                                db.all('SELECT * FROM users', [], (err, rows) => {
+                                path = 'none';
+                                db.all('SELECT * FROM users', (err, rows) => {
                                     if (err) {
                                         console.error(err);
                                     }
-                                    rows.forEach((row) => {
-                                        bot.telegram.sendMessage(row.user_id, msg);
+                                    const uniqueUserIds = new Set(rows.map(row => row.user_id));
+                                    uniqueUserIds.forEach(userId => {
+                                        return bot.telegram.sendMessage(userId, msg);
                                     });
                                     ctx.reply('تم إرسال الرسالة بنجاح');
                                 });
-                                path = 'none';
                                 break;
                             case 'ban':
                                 db.run('UPDATE users SET banned = ? WHERE user_id = ?', ['true', msg]);
@@ -295,7 +295,7 @@ db.all('SELECT * FROM bots', [], (err, rows) => {
                         if (isSenderAdmin) {
                             return;
                         }
-                        const fullName = `${ctx.message.from.first_name} ${ctx.message.from.last_name}`;
+                        const fullName = `${ctx.message.from.first_name || ''} ${ctx.message.from.last_name || ''}`;
 
                         db.get('SELECT * FROM users WHERE user_id = ? AND bot_id = ?', [userId, botId], (err, row) => {
                             if (err) {
@@ -311,7 +311,11 @@ db.all('SELECT * FROM bots', [], (err, rows) => {
                             const prettifiedMessage = `📩 رسالة جديدة\n\n👤 المرسل: ${fullName}\n🆔 الرقم: ${userId}\n\n📄 الرسالة: ${msg}`;
                             db.run('INSERT INTO messages (user_id, message, bot_id) VALUES (?, ?, ?)', [ctx.message.from.id, prettifiedMessage, botId]);
                             for (const admin of dataAdmins) {
-                                await bot.telegram.sendMessage(admin['chat_id'], prettifiedMessage);
+                                try {
+                                    await bot.telegram.sendMessage(admin['chat_id'], prettifiedMessage);
+                                } catch (e) {
+                                    return;
+                                }
                             }
                         }
                     }
@@ -323,6 +327,6 @@ db.all('SELECT * FROM bots', [], (err, rows) => {
             });
         });
     } catch (e) {
-        console.log(e);
+        console.error(e);
     }
 })

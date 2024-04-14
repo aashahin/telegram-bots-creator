@@ -29,7 +29,7 @@ app.get('/admins', async (req, res) => {
     if (!botId) {
         res.json({error: 'No bot ID provided'});
     } else {
-        await db.all(`SELECT * FROM admins WHERE bot_id = ?`, [botId], (err, rows) => {
+        await db.all(`SELECT * FROM admins WHERE bot_id = ?`, [Number(botId)], (err, rows) => {
             if (err) {
                 console.error(err);
                 res.json({error: 'Internal server error'});
