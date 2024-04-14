@@ -61,11 +61,18 @@ db.all('SELECT * FROM bots', [], (err, rows) => {
             }
 
             bot.start(async (ctx) => {
+                if (await isAdmin(ctx)) {
+                    return ctx.reply('أهلاً بك! يمكنك الوصول إلى لوحة التحكم من خلال الضغط على /admin\n' + 'للمساعدة يمكنك التواصل معنا من خلال هذا الرابط: https://t.me/telegram');
+                }
                 const res = await fetch(`http://0.0.0.0:3000/bots?token=${token}`).catch((err) => {
                     console.log(err);
                 });
                 const data = await res.json();
                 ctx.reply(data['startMsg']);
+            });
+
+            bot.command('help', async (ctx) => {
+                ctx.reply('للوصول إلى لوحة التحكم، اضغط على /admin\n' + 'للمساعدة يمكنك التواصل معنا من خلال هذا الرابط: https://t.me/telegram');
             });
 
             bot.command('admin', async (ctx) => {
@@ -310,7 +317,6 @@ db.all('SELECT * FROM bots', [], (err, rows) => {
                     }
                 });
             });
-
 
             await bot.launch().catch((err) => {
                 console.error(err);
