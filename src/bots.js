@@ -328,13 +328,10 @@ const bots = () => {
                             if (msg && !msg.startsWith('/')) {
                                 const prettifiedMessage = `📩 رسالة جديدة\n\n👤 المرسل: ${fullName}\n🆔 الرقم: ${userId}\n\n📄 الرسالة: ${msg}`;
                                 db.run('INSERT INTO messages (user_id, message, bot_id) VALUES (?, ?, ?)', [ctx.message.from.id, prettifiedMessage, botId]);
-                                for (const admin of dataAdmins) {
-                                    try {
-                                        await ctx.telegram.forwardMessage(admin['chat_id'], ctx.message.chat.id, ctx.message.message_id);
-                                    } catch (e) {
-                                        return;
-                                    }
-                                }
+                                const uniqueAdminIds = new Set(dataAdmins.map(admin => admin.chat_id));
+                                uniqueAdminIds.forEach((admin) => {
+                                    return ctx.telegram.forwardMessage(admin, ctx.message.chat.id, ctx.message.message_id);
+                                })
                             }
                         }
                     });
