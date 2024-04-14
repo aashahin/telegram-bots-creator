@@ -1,3 +1,5 @@
+const fs = require('node:fs');
+
 module.exports = function messages (bot, Markup, db, botId) {
     bot.action('viewMessages', async (ctx) => {
         db.all(`SELECT * FROM messages WHERE bot_id = ?`, [botId], (err, row) => {
@@ -17,7 +19,13 @@ module.exports = function messages (bot, Markup, db, botId) {
                 messages += message.message + '\n';
             });
 
-            ctx.reply(messages);
+            fs.writeFile('messages.txt', messages, (err) => {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                ctx.replyWithDocument({source: 'messages.txt'});
+            });
         });
     });
 

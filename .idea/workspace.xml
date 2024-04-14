@@ -9,7 +9,6 @@
       <change beforePath="$PROJECT_DIR$/bots.db" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/bots.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/bots.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/bots/admin/messages.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/bots/admin/messages.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -72,7 +71,11 @@
       <workItem from="1712884694179" duration="1599000" />
       <workItem from="1712886491772" duration="30324000" />
       <workItem from="1712971740687" duration="25000" />
-      <workItem from="1712971825484" duration="36129000" />
+      <workItem from="1712971825484" duration="39302000" />
+      <workItem from="1713096793311" duration="5378000" />
+      <workItem from="1713106173715" duration="10588000" />
+      <workItem from="1713121901506" duration="660000" />
+      <workItem from="1713122655798" duration="4779000" />
     </task>
     <servers />
   </component>
