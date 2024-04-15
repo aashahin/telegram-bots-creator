@@ -311,13 +311,17 @@ const messages = async (ctx) => {
                         messages += message.message + '\n' + `معرف البوت: ${message['bot_id']}` + '\n\n';
                     });
 
-                    fs.writeFile('messages.txt', messages, (err) => {
+                    if (messages === '') {
+                        path = 'none';
+                        return ctx.reply('لا توجد رسائل');
+                    }
+                    path = 'none';
+                    return fs.writeFile('messages.txt', messages, (err) => {
                         if (err) {
                             console.error(err);
                             path = 'none';
                             return;
                         }
-                        path = 'none';
                         ctx.replyWithDocument({source: 'messages.txt'});
                     });
                 });
