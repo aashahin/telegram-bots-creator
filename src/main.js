@@ -34,6 +34,7 @@ const bot = new Telegraf(process.env.BOT_TOKEN, {
 let path = 'none';
 
 bot.start((ctx) => {
+    events.emit('botCreated');
     db.all('SELECT * FROM settings', async (err, row) => {
         if (err) {
             console.error(err);
@@ -350,11 +351,9 @@ bot.help(help);
 
 bot.launch();
 
-bots();
-
 // Handle bot creation
 events.on('botCreated', async () => {
-    execSync('pm2 restart bots-creator');
+    bots();
 });
 
 events.on('botDeleted', async () => {
