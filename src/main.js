@@ -350,13 +350,15 @@ bot.help(help);
 
 bot.launch();
 
+bots();
+
 // Handle bot creation
 events.on('botCreated', async () => {
-    bots();
+    execSync('pm2 restart bots-creator');
 });
 
 events.on('botDeleted', async () => {
-    execSync('pm2 restart main');
+    execSync('pm2 restart bots-creator');
 });
 
 // Handle bot errors
